@@ -2063,15 +2063,19 @@ bgp_attr_parse (struct peer *peer, struct attr *attr, bgp_size_t size,
 	     message, then the Error Subcode is set to Malformed Attribute
 	     List. */
 
-    if (CHECK_BITMAP (seen, type))
-	  {
+    if (CHECK_BITMAP (seen, type)) {
+      if (type == BGP_ATTR_AS_PATH && length == 0) {
+        // Accept silently and skip this attribute
+        stream_forward_getp(peer->ibuf, length);
+        continue;
+      }
+    
       zlog (peer->log, LOG_WARNING,
-      "%s: error BGP attribute type %d appears twice in a message",
-      peer->host, type);
-
+            "%s: error BGP attribute type %d appears twice in a message",
+            peer->host, type);
       bgp_notify_send (peer,
-           BGP_NOTIFY_UPDATE_ERR,
-           BGP_NOTIFY_UPDATE_MAL_ATTR);
+                       BGP_NOTIFY_UPDATE_ERR,
+                       BGP_NOTIFY_UPDATE_MAL_ATTR);
       return BGP_ATTR_PARSE_ERROR;
     }
 
@@ -2338,8 +2342,7 @@ bgp_attr_check (struct peer *peer, struct attr *attr)
   if (! CHECK_FLAG (attr->flag, ATTR_FLAG_BIT (BGP_ATTR_ORIGIN)))
     type = BGP_ATTR_ORIGIN;
 
-  if (! CHECK_FLAG (attr->flag, ATTR_FLAG_BIT (BGP_ATTR_AS_PATH)) &&
-      !attr->aspath)
+  if (! CHECK_FLAG (attr->flag, ATTR_FLAG_BIT (BGP_ATTR_AS_PATH))
     type = BGP_ATTR_AS_PATH;
 
   if (! CHECK_FLAG (attr->flag, ATTR_FLAG_BIT (BGP_ATTR_NEXT_HOP)))
