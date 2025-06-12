@@ -141,6 +141,7 @@
  * 0.1.0.0 - 2015/07/31 - oborchert
  *           * Created File.
  */
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -583,8 +584,18 @@ static int _runBGPRouterSession(PrgParams* params, int sessionNr)
       
       if (bgp_update != NULL)
       {
-        sendUpdate(session, bgp_update, SESS_FLOW_CONTROL_REPEAT);
-        updatesSend++;
+          // Insert timestamp logging here
+          struct timespec ts;
+          clock_gettime(CLOCK_REALTIME, &ts);
+          uint64_t ns = ts.tv_sec * 1000000000LL + ts.tv_nsec;
+      
+          char prefixStr[64] = {0};
+          printPrefix(prefix, prefixStr, sizeof(prefixStr));  // Or manually format it if needed
+          printf("[SEND_TIMESTAMP_NS] %lu for prefix %s\n", ns, prefixStr);
+      
+          sendUpdate(session, bgp_update, SESS_FLOW_CONTROL_REPEAT);
+          updatesSend++;
+
 #ifdef DEBUG
         if (updatesSend % 1000 == 0)
         {
