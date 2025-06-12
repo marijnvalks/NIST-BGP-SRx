@@ -584,11 +584,15 @@ static int _runBGPRouterSession(PrgParams* params, int sessionNr)
       
       if (bgp_update != NULL)
       {
-      
-          sendUpdate(session, bgp_update, SESS_FLOW_CONTROL_REPEAT);
-          updatesSend++;
-      }
-
+        time_t sec = time(NULL);  // current time in seconds
+        printf("[SEND_TIMESTAMP_S] %ld - Prefix: %u.%u.%u.%u/%d\n",
+               sec,
+               prefix->prefix[0], prefix->prefix[1],
+               prefix->prefix[2], prefix->prefix[3],
+               prefix->length);
+    
+        sendUpdate(session, bgp_update, SESS_FLOW_CONTROL_REPEAT);
+        updatesSend++;
 #ifdef DEBUG
         if (updatesSend % 1000 == 0)
         {
