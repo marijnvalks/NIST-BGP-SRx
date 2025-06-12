@@ -590,12 +590,7 @@ static int _runBGPRouterSession(PrgParams* params, int sessionNr)
           // Convert to nanoseconds
           long long timestamp_ns = (long long)ts.tv_sec * 1000000000LL + ts.tv_nsec;
       
-          // Manually print IPv4 prefix
-          printf("[SEND_TIMESTAMP_NS] %lld - Prefix: %u.%u.%u.%u/%d\n",
-                 timestamp_ns,
-                 prefix->prefix[0], prefix->prefix[1],
-                 prefix->prefix[2], prefix->prefix[3],
-                 prefix->length);
+          printf("[SEND_TIMESTAMP_nS] %ld - Sent prefix update\n", timestamp_ns);
       
           sendUpdate(session, bgp_update, SESS_FLOW_CONTROL_REPEAT);
           updatesSend++;
